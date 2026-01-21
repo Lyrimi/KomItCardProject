@@ -1,13 +1,16 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerHandler : MonoBehaviour
 {
     public GameObject[] Playerslots;
-    string[] elementInSlot;
+    
     public List<string> elementInHand;
     int selectedPlayerSlot;
     public CardOrginiser cardOrginiser;
+    [Header("DONT TOUCH")]
+    [SerializeField] string[] elementInSlot;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -16,7 +19,7 @@ public class PlayerHandler : MonoBehaviour
         elementInSlot = new string[Playerslots.Length];
         for (int i = 0; i < elementInSlot.Length; i++)
         {
-            elementInSlot[i] = "";
+            elementInSlot[i] = "Empty";
         }
 
         cardOrginiser.SetCards(elementInHand);
@@ -34,12 +37,20 @@ public class PlayerHandler : MonoBehaviour
         {
             for (int i = 0; i < Playerslots.Length; i++)
             {
-                if (obj == Playerslots[i] && elementInSlot[i] == "")
+                if (obj == Playerslots[i])
                 {
-                    selectedPlayerSlot = i;
+                    if (elementInSlot[i] == "Empty")
+                    {
+                        selectedPlayerSlot = i;
+                    }
+                    else
+                    {
+                        ClickedUsedSlot(i);
+                    }
+                    
                 }
             }
-            UpdatePlayerSlotSelected();
+            UpdatePlayerSlot();
         }
 
         if (obj.tag == "Card")
@@ -54,30 +65,76 @@ public class PlayerHandler : MonoBehaviour
                 }
             }
             print($"Index{cardindex}");
-            ClickedCard(cardindex);
+            ClickedCardInHand(cardindex);
         }
 
         print($"You clicked {obj.name}");
     }
-    
-    void ClickedCard(int index)
+
+    void ClickedCardInHand(int index)
     {
-        elementInHand.RemoveAt(index);
+        if (selectedPlayerSlot != -1 && elementInSlot[selectedPlayerSlot] == "Empty")
+        {
+            elementInSlot[selectedPlayerSlot] = elementInHand[index];
+            elementInHand.RemoveAt(index);
+            cardOrginiser.SetCards(elementInHand);
+            int count = Playerslots.Length;
+            bool empty = false;
+            foreach (string element in elementInSlot)
+            {
+                if (element == "Empty")
+                {
+                    empty = true;
+                }
+            }
+            if (empty)
+            {
+                while (elementInSlot[selectedPlayerSlot] != "Empty")
+                {
+                    if (selectedPlayerSlot + 1 < count)
+                    {
+                        selectedPlayerSlot += 1;
+                    }
+                    else
+                    {
+                        selectedPlayerSlot = 0;
+                    }
+                }
+            }
+            else
+            {
+                selectedPlayerSlot = -1;
+            }
+            UpdatePlayerSlot();
+        }
+
+    }
+    
+    void ClickedUsedSlot(int index)
+    {
+        elementInHand.Add(elementInSlot[index]);
+        elementInSlot[index] = "Empty";
+        selectedPlayerSlot = index;
         cardOrginiser.SetCards(elementInHand);
+        UpdatePlayerSlot();
     }
 
-    void UpdatePlayerSlotSelected()
+    void UpdatePlayerSlot()
     {
-        foreach (GameObject slot in Playerslots)
+        for (int i = 0; i < Playerslots.Length; i++)
         {
-            if (slot == Playerslots[selectedPlayerSlot])
+            GameObject slot = Playerslots[i];
+            if (selectedPlayerSlot != -1 && (slot == Playerslots[selectedPlayerSlot]))
             {
                 slot.transform.localScale = new Vector3(1f, 1f, 1f);
             }
             else
             {
-                slot.transform.localScale = new Vector3(0.75f,0.75f,0.75f);
+                slot.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
             }
+            CardSlot cardSlot = slot.GetComponent<CardSlot>();
+            cardSlot.SetTexutre(elementInSlot[i]);
         }
+           
     }
 }

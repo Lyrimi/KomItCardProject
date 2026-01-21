@@ -11,7 +11,7 @@ public class CardOrginiser : MonoBehaviour
     [SerializeField] private GameObject CardTemplate;
     [SerializeField] private Sprite[] Sprites;
     [SerializeField] private string[] Keys;
-    Dictionary<string, Sprite> SpriteDictionary;
+    public Dictionary<string, Sprite> SpriteDictionary;
     public int test;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

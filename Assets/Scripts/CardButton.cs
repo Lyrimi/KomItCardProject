@@ -36,7 +36,7 @@ public class CardButton : MonoBehaviour
 
         if (hit.collider != null && hit.collider.gameObject == gameObject)
         {
-            player.OnClick(gameObject); 
+            player.OnClick(gameObject);
         }
     }
 }
