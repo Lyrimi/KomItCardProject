@@ -23,6 +23,7 @@ public class CardSlot : MonoBehaviour
 
     public void SetTexutre(String element)
     {
+        print(SpriteDictionary);
         rend.sprite = SpriteDictionary[element];
     }
 }

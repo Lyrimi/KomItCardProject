@@ -148,6 +148,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bde2749c3bd2b9c06b8aca5bca56fefd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  Enemyslots:
+  - {fileID: 248628575}
+  RngElements:
+  - Water
+  - Earth
+  - Wind
+  - Fire
+  elementInSlot: []
 --- !u!4 &63287105
 Transform:
   m_ObjectHideFlags: 0
@@ -920,7 +928,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a84e4fd0ad1df987293123c5a0e558fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardButton
-  TypeCallback: Player
 --- !u!61 &1913690466
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1130,7 +1137,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a84e4fd0ad1df987293123c5a0e558fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardButton
-  TypeCallback: Player
 --- !u!114 &2144407909
 MonoBehaviour:
   m_ObjectHideFlags: 0
