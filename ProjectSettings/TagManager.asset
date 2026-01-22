@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Slot
   - Card
+  - AtkDefSlot
   layers:
   - Default
   - TransparentFX

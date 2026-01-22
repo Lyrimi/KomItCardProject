@@ -10,8 +10,7 @@ public class CardSlot : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        cardOrginiser = FindFirstObjectByType<CardOrginiser>();
-        SpriteDictionary = cardOrginiser.SpriteDictionary;
+        SpriteDictionary = Globals.SpriteDictionary;
         rend = GetComponent<SpriteRenderer>();
     }
 
@@ -23,7 +22,6 @@ public class CardSlot : MonoBehaviour
 
     public void SetTexutre(String element)
     {
-        print(SpriteDictionary);
         rend.sprite = SpriteDictionary[element];
     }
 }

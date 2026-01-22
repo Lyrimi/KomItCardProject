@@ -4,11 +4,13 @@ using System.Collections.Generic;
 public class EnemyHandler : MonoBehaviour
 {
     public GameObject[] Enemyslots;
+    [SerializeField] public GameObject[] AttackDefendButtons;
 
     public string[] RngElements;
 
     [Header("Don't touch")]
     public string[] elementInSlot;
+    [SerializeField] public int[] AttackDefendSlotMode;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -18,13 +20,19 @@ public class EnemyHandler : MonoBehaviour
         {
             elementInSlot[i] = "Empty";
         }
-        GenerateElements();
+        AttackDefendSlotMode = new int[Enemyslots.Length];
+        if (Enemyslots.Length != AttackDefendButtons.Length)
+        {
+            Debug.LogError("There is not an equal amount of PlayerSlots and AttackDeffend buttons");
+            return;
+        }
+        NextRound();
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 
     public void GenerateElements()
@@ -36,6 +44,15 @@ public class EnemyHandler : MonoBehaviour
         UpdateEnemySlots();
     }
 
+    public void GenerateAttakDefends()
+    {
+        for (int i = 0; i < Enemyslots.Length; i++)
+        {
+            AttackDefendSlotMode[i] = Random.Range(0, 2);
+        }
+        UpdateAttackDeffend();
+    }
+
     void UpdateEnemySlots()
     {
         for (int i = 0; i < Enemyslots.Length; i++)
@@ -43,5 +60,20 @@ public class EnemyHandler : MonoBehaviour
             CardSlot cardSlot = Enemyslots[i].GetComponent<CardSlot>();
             cardSlot.SetTexutre(elementInSlot[i]);
         }
+    }
+    void UpdateAttackDeffend()
+    {
+        for (int i = 0; i < AttackDefendButtons.Length; i++)
+        {
+            GameObject atkDef = AttackDefendButtons[i];
+            AttackDefendButton attackDefendButton = atkDef.GetComponent<AttackDefendButton>();
+            attackDefendButton.SetSprite(AttackDefendSlotMode[i]);
+        }
+    }
+    
+    public void NextRound()
+    {
+        GenerateAttakDefends();
+        GenerateElements();
     }
 }

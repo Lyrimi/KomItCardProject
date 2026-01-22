@@ -1,28 +1,47 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerHandler : MonoBehaviour
 {
     public GameObject[] Playerslots;
-    
+    [SerializeField] public GameObject[] AttackDefendButtons;
+
     public List<string> elementInHand;
     int selectedPlayerSlot;
     public CardOrginiser cardOrginiser;
     [Header("DONT TOUCH")]
-    [SerializeField] string[] elementInSlot;
+    [SerializeField] public string[] elementInSlot;
+    [SerializeField] public int[] AttackDefendSlotMode;
+
+    struct MagicNumbers
+    {
+        public const int attack = 0;
+        public const int defend = 1;
+    }
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         elementInSlot = new string[Playerslots.Length];
+
         for (int i = 0; i < elementInSlot.Length; i++)
         {
             elementInSlot[i] = "Empty";
         }
+        AttackDefendSlotMode = new int[Playerslots.Length];
+        if (Playerslots.Length != AttackDefendButtons.Length)
+        {
+            Debug.LogError("There is not an equal amount of PlayerSlots and AttackDeffend buttons");
+            return;
+        }
 
+        //Init Textures
         cardOrginiser.SetCards(elementInHand);
+        UpdateAttackDeffend();
+        UpdatePlayerSlot();
     }
     
     // Update is called once per frame
@@ -47,6 +66,7 @@ public class PlayerHandler : MonoBehaviour
                     {
                         ClickedUsedSlot(i);
                     }
+                    break;
                     
                 }
             }
@@ -55,17 +75,26 @@ public class PlayerHandler : MonoBehaviour
 
         if (obj.tag == "Card")
         {
-            int cardindex = 0;
             for (int i = 0; i < cardOrginiser.Cards.Count; i++)
             {
-                if (obj.transform == cardOrginiser.Cards[i].transform)
+                if (obj == cardOrginiser.Cards[i])
                 {
-                    cardindex = i;
+                    ClickedCardInHand(i);
                     break;
                 }
             }
-            print($"Index{cardindex}");
-            ClickedCardInHand(cardindex);
+        }
+
+        if (obj.tag == "AtkDefSlot")
+        {
+            for (int i = 0; i < AttackDefendButtons.Length; i++)
+            {
+                if (obj == AttackDefendButtons[i])
+                {
+                    ClickedAttakDefendButton(i);
+                    break;
+                }
+            }
         }
 
         print($"You clicked {obj.name}");
@@ -109,7 +138,7 @@ public class PlayerHandler : MonoBehaviour
         }
 
     }
-    
+
     void ClickedUsedSlot(int index)
     {
         elementInHand.Add(elementInSlot[index]);
@@ -117,6 +146,24 @@ public class PlayerHandler : MonoBehaviour
         selectedPlayerSlot = index;
         cardOrginiser.SetCards(elementInHand);
         UpdatePlayerSlot();
+    }
+    
+    void ClickedAttakDefendButton(int index)
+    {
+        if (AttackDefendSlotMode[index] == MagicNumbers.attack)
+        {
+            AttackDefendSlotMode[index] = MagicNumbers.defend;
+        }
+        else if (AttackDefendSlotMode[index] == MagicNumbers.defend)
+        {
+            AttackDefendSlotMode[index] = MagicNumbers.attack;
+        }
+        else
+        {
+            Debug.LogWarning("Attack Defend not set properly");
+        }
+        UpdateAttackDeffend();
+        
     }
 
     void UpdatePlayerSlot()
@@ -135,6 +182,16 @@ public class PlayerHandler : MonoBehaviour
             CardSlot cardSlot = slot.GetComponent<CardSlot>();
             cardSlot.SetTexutre(elementInSlot[i]);
         }
-           
+
+    }
+    
+    void UpdateAttackDeffend()
+    {
+        for (int i = 0; i < AttackDefendButtons.Length; i++)
+        {
+            GameObject atkDef = AttackDefendButtons[i];
+            AttackDefendButton attackDefendButton = atkDef.GetComponent<AttackDefendButton>();
+            attackDefendButton.SetSprite(AttackDefendSlotMode[i]);
+        }
     }
 }

@@ -9,20 +9,18 @@ public class CardOrginiser : MonoBehaviour
     [SerializeField] Transform BasePostion;
     [SerializeField] float Spaceing;
     [SerializeField] private GameObject CardTemplate;
-    [SerializeField] private Sprite[] Sprites;
-    [SerializeField] private string[] Keys;
+    [SerializeField] private bool IsPlayer = true;
+    //[SerializeField] private Sprite[] Sprites;
+    //[SerializeField] private string[] Keys;
     public Dictionary<string, Sprite> SpriteDictionary;
     public int test;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        SpriteDictionary = Globals.SpriteDictionary;
     }
 
-    void Awake()
-    {
-        BuildDictionary();
-    }
+    
     // Update is called once per frame
     void Update()
     {
@@ -64,41 +62,18 @@ public class CardOrginiser : MonoBehaviour
 
     void AddCard(string element)
     {
-        GameObject gameObject = Instantiate(CardTemplate);
-        SpriteRenderer rend = gameObject.GetComponent<SpriteRenderer>();
+        GameObject card = Instantiate(CardTemplate);
+        SpriteRenderer rend = card.GetComponent<SpriteRenderer>();
         rend.sprite = SpriteDictionary[element];
-        Cards.Add(gameObject);
+        Cards.Add(card);
+        if (!IsPlayer)
+        {
+            Destroy(card.GetComponent<BoxCollider2D>());
+        }
     }
     
 
-    private void BuildDictionary()
-    {
-        SpriteDictionary = new Dictionary<string, Sprite>();
-
-        // Safety check
-        if (Keys.Length != Sprites.Length)
-        {
-            Debug.LogError("Keys and Sprites arrays must have the same length!");
-            return;
-        }
-
-        for (int i = 0; i < Keys.Length; i++)
-        {
-            if (string.IsNullOrEmpty(Keys[i]))
-            {
-                Debug.LogWarning($"Key at index {i} is null or empty, skipping.");
-                continue;
-            }
-
-            if (SpriteDictionary.ContainsKey(Keys[i]))
-            {
-                Debug.LogWarning($"Duplicate key '{Keys[i]}' found, skipping.");
-                continue;
-            }
-
-            SpriteDictionary.Add(Keys[i], Sprites[i]);
-        }
-    }
+   
 
 
 }
