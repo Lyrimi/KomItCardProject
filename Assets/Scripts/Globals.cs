@@ -36,12 +36,12 @@ public class Globals : MonoBehaviour
         public string Name;
         public string DefaultEffect;
         public Dictionary<string, string> ReactionDict;
-        
+
     }
 
     public static ElementLookup[] ElementLookups;
 
-    
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -71,14 +71,14 @@ public class Globals : MonoBehaviour
 
     void BuildStringToElement()
     {
-         StringToElement = new Dictionary<string, ElementLookup>();
+        StringToElement = new Dictionary<string, ElementLookup>();
 
         foreach (ElementLookup elementLookup in ElementLookups)
         {
             StringToElement.Add(elementLookup.Name, elementLookup);
         }
     }
-    
+
     private void BuildDictionarys()
     {
         SpriteDictionary = new Dictionary<string, Sprite>();
@@ -109,7 +109,7 @@ public class Globals : MonoBehaviour
 
         EffectDamageLookUp = new Dictionary<string, int>();
 
-         // Safety check
+        // Safety check
         if (EffectDmgKeys.Length != EffectDmgValues.Length)
         {
             Debug.LogError("Keys and Sprites arrays must have the same length!");
