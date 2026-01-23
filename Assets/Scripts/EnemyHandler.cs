@@ -11,7 +11,7 @@ public class EnemyHandler : MonoBehaviour
     [Header("Don't touch")]
     public string[] elementInSlot;
     [SerializeField] public int[] AttackDefendSlotMode;
-
+    public bool IsFrozen = false;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -32,7 +32,7 @@ public class EnemyHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void GenerateElements()
@@ -53,12 +53,20 @@ public class EnemyHandler : MonoBehaviour
         UpdateAttackDeffend();
     }
 
-    void UpdateEnemySlots()
+    public void UpdateEnemySlots()
     {
         for (int i = 0; i < Enemyslots.Length; i++)
         {
             CardSlot cardSlot = Enemyslots[i].GetComponent<CardSlot>();
-            cardSlot.SetTexutre(elementInSlot[i]);
+            if (IsFrozen)
+            {
+                cardSlot.SetTexutre("EmptyFrozen");
+            }
+            else
+            {
+                cardSlot.SetTexutre(elementInSlot[i]);
+            }
+
         }
     }
     void UpdateAttackDeffend()
@@ -70,7 +78,7 @@ public class EnemyHandler : MonoBehaviour
             attackDefendButton.SetSprite(AttackDefendSlotMode[i]);
         }
     }
-    
+
     public void NextRound()
     {
         GenerateAttakDefends();

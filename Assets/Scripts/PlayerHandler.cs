@@ -8,12 +8,19 @@ public class PlayerHandler : MonoBehaviour
     public GameObject[] Playerslots;
     [SerializeField] public GameObject[] AttackDefendButtons;
 
-    public List<string> elementInHand;
+
+    public string[] RngElements;
+    [SerializeField] int MaxCards;
+
     int selectedPlayerSlot;
-    public CardOrginiser cardOrginiser;
+    public CardOrginiser CardOrginiser;
     [Header("DONT TOUCH")]
-    [SerializeField] public string[] elementInSlot;
+    public List<string> ElementInHand;
+    [SerializeField] public string[] ElementInSlot;
     [SerializeField] public int[] AttackDefendSlotMode;
+
+    public bool CanPlay = true;
+    public bool IsFrozen = false;
 
     struct MagicNumbers
     {
@@ -25,11 +32,11 @@ public class PlayerHandler : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        elementInSlot = new string[Playerslots.Length];
+        ElementInSlot = new string[Playerslots.Length];
 
-        for (int i = 0; i < elementInSlot.Length; i++)
+        for (int i = 0; i < ElementInSlot.Length; i++)
         {
-            elementInSlot[i] = "Empty";
+            ElementInSlot[i] = "Empty";
         }
         AttackDefendSlotMode = new int[Playerslots.Length];
         if (Playerslots.Length != AttackDefendButtons.Length)
@@ -37,13 +44,9 @@ public class PlayerHandler : MonoBehaviour
             Debug.LogError("There is not an equal amount of PlayerSlots and AttackDeffend buttons");
             return;
         }
-
-        //Init Textures
-        cardOrginiser.SetCards(elementInHand);
-        UpdateAttackDeffend();
-        UpdatePlayerSlot();
+        RefreshPlayer();
     }
-    
+
     // Update is called once per frame
     void Update()
     {
@@ -52,13 +55,17 @@ public class PlayerHandler : MonoBehaviour
 
     public void OnClick(GameObject obj)
     {
+        if (CanPlay == false)
+        {
+            return;
+        }
         if (obj.tag == "Slot")
         {
             for (int i = 0; i < Playerslots.Length; i++)
             {
                 if (obj == Playerslots[i])
                 {
-                    if (elementInSlot[i] == "Empty")
+                    if (ElementInSlot[i] == "Empty")
                     {
                         selectedPlayerSlot = i;
                     }
@@ -67,7 +74,7 @@ public class PlayerHandler : MonoBehaviour
                         ClickedUsedSlot(i);
                     }
                     break;
-                    
+
                 }
             }
             UpdatePlayerSlot();
@@ -75,9 +82,9 @@ public class PlayerHandler : MonoBehaviour
 
         if (obj.tag == "Card")
         {
-            for (int i = 0; i < cardOrginiser.Cards.Count; i++)
+            for (int i = 0; i < CardOrginiser.Cards.Count; i++)
             {
-                if (obj == cardOrginiser.Cards[i])
+                if (obj == CardOrginiser.Cards[i])
                 {
                     ClickedCardInHand(i);
                     break;
@@ -102,14 +109,14 @@ public class PlayerHandler : MonoBehaviour
 
     void ClickedCardInHand(int index)
     {
-        if (selectedPlayerSlot != -1 && elementInSlot[selectedPlayerSlot] == "Empty")
+        if (selectedPlayerSlot != -1 && ElementInSlot[selectedPlayerSlot] == "Empty")
         {
-            elementInSlot[selectedPlayerSlot] = elementInHand[index];
-            elementInHand.RemoveAt(index);
-            cardOrginiser.SetCards(elementInHand);
+            ElementInSlot[selectedPlayerSlot] = ElementInHand[index];
+            ElementInHand.RemoveAt(index);
+            CardOrginiser.SetCards(ElementInHand);
             int count = Playerslots.Length;
             bool empty = false;
-            foreach (string element in elementInSlot)
+            foreach (string element in ElementInSlot)
             {
                 if (element == "Empty")
                 {
@@ -118,7 +125,7 @@ public class PlayerHandler : MonoBehaviour
             }
             if (empty)
             {
-                while (elementInSlot[selectedPlayerSlot] != "Empty")
+                while (ElementInSlot[selectedPlayerSlot] != "Empty")
                 {
                     if (selectedPlayerSlot + 1 < count)
                     {
@@ -141,32 +148,38 @@ public class PlayerHandler : MonoBehaviour
 
     void ClickedUsedSlot(int index)
     {
-        elementInHand.Add(elementInSlot[index]);
-        elementInSlot[index] = "Empty";
+        ElementInHand.Add(ElementInSlot[index]);
+        ElementInSlot[index] = "Empty";
         selectedPlayerSlot = index;
-        cardOrginiser.SetCards(elementInHand);
+        CardOrginiser.SetCards(ElementInHand);
         UpdatePlayerSlot();
     }
-    
+
     void ClickedAttakDefendButton(int index)
     {
-        if (AttackDefendSlotMode[index] == MagicNumbers.attack)
-        {
-            AttackDefendSlotMode[index] = MagicNumbers.defend;
-        }
-        else if (AttackDefendSlotMode[index] == MagicNumbers.defend)
+        if (AttackDefendSlotMode[index] == MagicNumbers.defend)
         {
             AttackDefendSlotMode[index] = MagicNumbers.attack;
         }
+
+        else if (AttackDefendSlotMode[index] == MagicNumbers.attack)
+        {
+            for (int i = 0; i < AttackDefendSlotMode.Length; i++)
+            {
+                AttackDefendSlotMode[i] = MagicNumbers.attack;
+            }
+            AttackDefendSlotMode[index] = MagicNumbers.defend;
+        }
+
         else
         {
             Debug.LogWarning("Attack Defend not set properly");
         }
         UpdateAttackDeffend();
-        
+
     }
 
-    void UpdatePlayerSlot()
+    public void UpdatePlayerSlot()
     {
         for (int i = 0; i < Playerslots.Length; i++)
         {
@@ -180,11 +193,23 @@ public class PlayerHandler : MonoBehaviour
                 slot.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
             }
             CardSlot cardSlot = slot.GetComponent<CardSlot>();
-            cardSlot.SetTexutre(elementInSlot[i]);
+            if (ElementInSlot[i] == "Empty" && CanPlay)
+            {
+                cardSlot.SetTexutre("PlayerEmpty");
+            }
+            if (IsFrozen)
+            {
+                cardSlot.SetTexutre("EmptyFrozen");
+            }
+            else
+            {
+                cardSlot.SetTexutre(ElementInSlot[i]);
+            }
+
         }
 
     }
-    
+
     void UpdateAttackDeffend()
     {
         for (int i = 0; i < AttackDefendButtons.Length; i++)
@@ -193,5 +218,21 @@ public class PlayerHandler : MonoBehaviour
             AttackDefendButton attackDefendButton = atkDef.GetComponent<AttackDefendButton>();
             attackDefendButton.SetSprite(AttackDefendSlotMode[i]);
         }
+    }
+
+    void GenerateCards()
+    {
+        for (int i = 0; i < MaxCards; i++)
+        {
+            ElementInHand.Add(RngElements[UnityEngine.Random.Range(0, RngElements.Length)]);
+        }
+    }
+
+    public void RefreshPlayer()
+    {
+        GenerateCards();
+        CardOrginiser.SetCards(ElementInHand);
+        UpdateAttackDeffend();
+        UpdatePlayerSlot();
     }
 }
