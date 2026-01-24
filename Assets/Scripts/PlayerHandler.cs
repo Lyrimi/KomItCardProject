@@ -104,7 +104,7 @@ public class PlayerHandler : MonoBehaviour
             }
         }
 
-        print($"You clicked {obj.name}");
+        //print($"You clicked {obj.name}");
     }
 
     void ClickedCardInHand(int index)

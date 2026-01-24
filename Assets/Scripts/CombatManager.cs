@@ -51,7 +51,7 @@ public class CombatManager : MonoBehaviour
 
         PlayerHealth = MaxPlayerHealth;
         EnemyHealth = MaxEnemyHealth;
-        print(GetEffectForTarget(1, "Water"));
+        //print(GetEffectForTarget(1, "Water"));
         UpdateHealth();
         UpdateStatus();
 
@@ -131,29 +131,7 @@ public class CombatManager : MonoBehaviour
         return -1;
     }
 
-    void ApplyDefense()
-    {
-        int[] PlayerModes = Player.AttackDefendSlotMode;
-        int[] EnemyModes = Enemy.AttackDefendSlotMode;
-        for (int i = 0; i < PlayerModes.Length; i++)
-        {
-            if (PlayerModes[i] == 1 && Player.ElementInSlot[i] != "Empty")
-            {
-                Status[Ids.Player] = Player.ElementInSlot[i] + "Def";
-                Player.ElementInSlot[i] = "Empty";
-                Player.UpdatePlayerSlot();
-            }
-        }
-        for (int i = 0; i < EnemyModes.Length; i++)
-        {
-            if (EnemyModes[i] == 1 && Enemy.elementInSlot[i] != "Empty")
-            {
-                Status[Ids.Enemy] = Enemy.elementInSlot[i] + "Def";
-                Enemy.elementInSlot[i] = "Empty";
-                Enemy.UpdateEnemySlots();
-            }
-        }
-    }
+    
 
     void UpdateStatus()
     {
@@ -169,10 +147,80 @@ public class CombatManager : MonoBehaviour
 
     public void OnClick(GameObject obj)
     {
-        print("Turn Ended");
+        //print("Turn Ended");
         StartCoroutine(DoCombat());
     }
 
+    IEnumerator Attack()
+    {
+        string[] PlayerElements = Player.ElementInSlot;
+        string[] EnemyElements = Enemy.elementInSlot;
+        for (int i = 0; i < PlayerElements.Length; i++)
+        {
+            if (Player.AttackDefendSlotMode[i] == 0 && Player.ElementInSlot[i] != "Empty")
+            {
+                AttackTarget(Ids.Enemy, PlayerElements[i]);
+                UpdateStatus();
+                CardSlot slot = Player.Playerslots[i].GetComponent<CardSlot>();
+                slot.SetAnimationTexture(Player.ElementInSlot[i]);
+                Player.ElementInSlot[i] = "Empty";
+                Player.UpdatePlayerSlot();
+                yield return new WaitForSeconds(RunAnimation(slot,"Attack"));
+            }
+        }
+        for (int i = 0; i < EnemyElements.Length; i++)
+        {
+            if (Enemy.AttackDefendSlotMode[i] == 0 && Enemy.elementInSlot[i] != "Empty")
+            {
+                AttackTarget(Ids.Player, EnemyElements[i]);
+                UpdateStatus();
+                CardSlot slot = Enemy.Enemyslots[i].GetComponent<CardSlot>();
+                slot.SetAnimationTexture(Enemy.elementInSlot[i]);
+                Enemy.elementInSlot[i] = "Empty";
+                Enemy.UpdateEnemySlots();
+                yield return new WaitForSeconds(RunAnimation(slot,"Attack"));
+            }
+        }
+    }
+    IEnumerator ApplyDefense()
+    {
+        int[] PlayerModes = Player.AttackDefendSlotMode;
+        int[] EnemyModes = Enemy.AttackDefendSlotMode;
+        float AnimationTime = 0;
+        for (int i = 0; i < PlayerModes.Length; i++)
+        {
+            if (PlayerModes[i] == 1 && Player.ElementInSlot[i] != "Empty")
+            {
+                Status[Ids.Player] = Player.ElementInSlot[i] + "Def";
+                CardSlot slot = Player.Playerslots[i].GetComponent<CardSlot>();
+                slot.SetAnimationTexture(Player.ElementInSlot[i]);
+                AnimationTime = RunAnimation(slot, "Defend");
+                Player.ElementInSlot[i] = "Empty";
+                Player.UpdatePlayerSlot();
+            }
+        }
+        for (int i = 0; i < EnemyModes.Length; i++)
+        {
+            if (EnemyModes[i] == 1 && Enemy.elementInSlot[i] != "Empty")
+            {
+                Status[Ids.Enemy] = Enemy.elementInSlot[i] + "Def";
+                CardSlot slot = Enemy.Enemyslots[i].GetComponent<CardSlot>();
+                slot.SetAnimationTexture(Enemy.elementInSlot[i]);
+                AnimationTime = RunAnimation(slot, "Defend");
+                Enemy.elementInSlot[i] = "Empty";
+                Enemy.UpdateEnemySlots();
+
+            }
+        }
+        UpdateStatus();
+        yield return new WaitForSeconds(AnimationTime);
+    }
+
+    float RunAnimation(CardSlot slot, string Animation)
+    {
+        float AnimationTime = slot.RunAnimation(Animation).length;
+        return AnimationTime;
+    }
     IEnumerator DoCombat()
     {
         Player.CanPlay = false;
@@ -195,36 +243,12 @@ public class CombatManager : MonoBehaviour
 
         if (DoesADefenseExist)
         {
-            print("did Defense");
-            ApplyDefense();
-            UpdateStatus();
-            yield return new WaitForSeconds(2);
+            //print("did Defense");
+            yield return ApplyDefense();
         }
 
-        string[] PlayerElements = Player.ElementInSlot;
-        string[] EnemyElements = Enemy.elementInSlot;
-        for (int i = 0; i < PlayerElements.Length; i++)
-        {
-            if (Player.AttackDefendSlotMode[i] == 0 && Player.ElementInSlot[i] != "Empty")
-            {
-                AttackTarget(Ids.Enemy, PlayerElements[i]);
-                UpdateStatus();
-                Player.ElementInSlot[i] = "Empty";
-                Player.UpdatePlayerSlot();
-                yield return new WaitForSeconds(1);
-            }
-        }
-        for (int i = 0; i < EnemyElements.Length; i++)
-        {
-            if (Enemy.AttackDefendSlotMode[i] == 0 && Enemy.elementInSlot[i] != "Empty")
-            {
-                AttackTarget(Ids.Player, EnemyElements[i]);
-                UpdateStatus();
-                Enemy.elementInSlot[i] = "Empty";
-                Enemy.UpdateEnemySlots();
-                yield return new WaitForSeconds(1);
-            }
-        }
+        yield return Attack();
+        
         ResolveDamage();
         UpdateHealth();
         yield return new WaitForSeconds(1);

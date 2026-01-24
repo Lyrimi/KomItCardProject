@@ -19,6 +19,7 @@ public class EnemyHandler : MonoBehaviour
         for (int i = 0; i < elementInSlot.Length; i++)
         {
             elementInSlot[i] = "Empty";
+            Enemyslots[i].GetComponent<CardSlot>().SetAsEnemyCard();
         }
         AttackDefendSlotMode = new int[Enemyslots.Length];
         if (Enemyslots.Length != AttackDefendButtons.Length)
