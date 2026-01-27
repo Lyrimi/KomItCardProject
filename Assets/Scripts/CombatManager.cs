@@ -8,6 +8,7 @@ using TMPro;
 using System.IO.IsolatedStorage;
 using System.Collections;
 using UnityEditor.Rendering;
+using UnityEngine.SceneManagement;
 
 public class CombatManager : MonoBehaviour
 {
@@ -37,10 +38,12 @@ public class CombatManager : MonoBehaviour
     Dictionary<string, int> EffectDamageLookUp;
 
     Element[] Elements;
+    SceneLoader sceneLoader;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        sceneLoader = FindAnyObjectByType<SceneLoader>();
         if (Status.Length < 2)
         {
             Status = new string[2];
@@ -248,12 +251,23 @@ public class CombatManager : MonoBehaviour
         }
 
         yield return Attack();
-        
+
         ResolveDamage();
         UpdateHealth();
         yield return new WaitForSeconds(1);
         Player.IsFrozen = false;
         Enemy.IsFrozen = false;
+
+        if (EnemyHealth <= 0)
+        {
+            CombatEnd(Ids.Enemy);
+             yield break;
+        }
+        if (PlayerHealth <= 0)
+        {
+            CombatEnd(Ids.Player);
+             yield break;
+        }
 
         if (Status[Ids.Enemy] != "Frozen")
         {
@@ -282,6 +296,24 @@ public class CombatManager : MonoBehaviour
         if (Player.ElementInHand.Count == 0)
         {
             Player.RefreshPlayer();
+        }
+    }
+    
+    void CombatEnd(int Id)
+    {
+        if (Ids.Enemy == Id)
+        {
+            print(SceneManager.GetActiveScene().buildIndex);
+            if (SceneManager.GetActiveScene().buildIndex == 2)
+            {
+                sceneLoader.LoadScene(3);
+                return;
+            }
+            sceneLoader.LoadScene(0);
+        }
+        if (Ids.Player == Id)
+        {
+            sceneLoader.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }

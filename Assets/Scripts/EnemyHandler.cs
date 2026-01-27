@@ -49,6 +49,19 @@ public class EnemyHandler : MonoBehaviour
     {
         for (int i = 0; i < Enemyslots.Length; i++)
         {
+            bool AlreadyDefending = false;
+            foreach (int attackDefend in AttackDefendSlotMode)
+            {
+                if (attackDefend == 1)
+                {
+                    AlreadyDefending = true;
+                }
+            }
+            if (AlreadyDefending)
+            {
+                AttackDefendSlotMode[i] = 0;
+                continue;
+            }
             AttackDefendSlotMode[i] = Random.Range(0, 2);
         }
         UpdateAttackDeffend();
